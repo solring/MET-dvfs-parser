@@ -11,16 +11,20 @@
 0. clean: make clean
 
 # Output Format
+output .csv file
 
 - InputFileName
 
 - Switch statistic
+
 [ Switch(level1-level2), Count ]
 
 - Switch history and corresponding CPU utilization
+
 [ Time, Freq1, Freq2, Load ]
 
 - CPU load history and corresponding frequency level
+
 [ Time, Load, Freq Level ]
 
 
