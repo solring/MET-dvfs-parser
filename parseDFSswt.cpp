@@ -6,7 +6,9 @@
 #include<list>
 
 #include<dirent.h>
+#include<string.h>
 #include"Record.h"
+
 
 #define STR_BUFFER_SIZE 128
 
@@ -23,11 +25,13 @@ int getfiles(string dir, vector<string> &files){
 
     while((dirp = readdir(dp)) != NULL){
         //join the dir and file name
-        string s = string(dir);
-        if(s.find_last_of('/') != s.size()) 
-            s.append("/");
+		
+		string s = string(dir);
+        if(s.find_last_of('\\') != s.size()) 
+            s.append("\\");
         s.append(dirp->d_name);
         files.push_back(s);
+		cout << "target file: " << s << endl;
     }
     closedir(dp);
     return 0;
@@ -46,33 +50,47 @@ void outputResult(map<string, FileProfile> flist){
         
         //Switch Summary
         fdout << "Switch,Count" << endl;
+#if __GNUC__ > 4
         for(pair<string, int> it : fp.accu){
-        //for(map<string, int>::iterator it = fp.accu.begin(); it!=fp.accu.end(); it++){
-            //sprintf(buf, "%s,%d", it->first.c_str(), it->second);
             sprintf(buf, "%s,%d", it.first.c_str(), it.second);
             fdout << buf << endl;
+		}
+#else
+        for(map<string, int>::iterator it = fp.accu.begin(); it!=fp.accu.end(); it++){
+            sprintf(buf, "%s,%d", it->first.c_str(), it->second);
+            fdout << buf << endl;
         }
-        //fprintf(fd, "total,%d\n", fd.accu.size());
+#endif
         fdout << endl;
     
         //Detail
         fdout << "Time,Freq1,Freq2,Load" << endl;
-        for(Record it : fp.records){
-        //for(vector<Record>::iterator it = fp.records.begin(); it!=fp.records.end(); it++){
-            //sprintf(buf, "%lf,%lf,%lf,%lf", it->time, it->level1, it->level2, it->load);
-            sprintf(buf, "%lf,%lf,%lf,%lf", it.time, it.level1, it.level2, it.load);
+#if __GNUC__ > 4
+		for(Record it : fp.records){
+			sprintf(buf, "%lf,%lf,%lf,%lf", it.time, it.level1, it.level2, it.load);
+			fdout << buf << endl;
+		}
+#else
+        for(vector<Record>::iterator it = fp.records.begin(); it!=fp.records.end(); it++){
+            sprintf(buf, "%lf,%lf,%lf,%lf", it->time, it->level1, it->level2, it->load);
             fdout << buf << endl;
         }
+#endif
         fdout << endl;
 
         //Detail load
         fdout << "Time,Freq,Load" << endl;
-        for(Load it : fp.loads){
-        //for(vector<Load>::iterator it = fp.loads.begin(); it!=fp.loads.end(); it++){
-            //sprintf(buf, "%lf,%lf,%lf", it->time, it->level, it->util);
-            sprintf(buf, "%lf,%lf,%lf", it.time, it.level, it.util);
+#if __GNUC__ > 4
+		for(Load it : fp.loads){
+			sprintf(buf, "%lf,%lf,%lf", it.time, it.level, it.util);
+            fdout << buf << endl;
+		}
+#else
+        for(vector<Load>::iterator it = fp.loads.begin(); it!=fp.loads.end(); it++){
+            sprintf(buf, "%lf,%lf,%lf", it->time, it->level, it->util);
             fdout << buf << endl;
         }
+#endif
         fdout << endl;
     }
     fdout.close();
@@ -233,14 +251,18 @@ int main(int argc, char **argv){
 
     vector<string> files;
     getfiles(targetdir, files);
+	printf("size of filelist: %d\n", files.size());
    
     //for every DFVS file, parse the switches and store to the vector.
-    for(int i; i<files.size(); i++){
+    for(int i=0; i<files.size(); i++){
+
         string *targetf;
         targetf = &files[i];
         if(targetf->find("DVFS")==string::npos) continue;
+		
+		cout << "before call parseDVFS" << endl;
         FileProfile fprofile = parseDVFSSwitch(*targetf);
-       
+		cout << "after call parseDVFS" << endl;
         
         printf("Number of switch: %d\n", fprofile.count);
         fps[*targetf] = fprofile;

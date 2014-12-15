@@ -7,7 +7,6 @@
 ## C++
 1. compile: make
 2. ./parseDFSswt [target_dir] [sample rate of MET log]
-
 0. clean: make clean
 
 # Output Format
