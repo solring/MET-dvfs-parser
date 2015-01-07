@@ -102,7 +102,7 @@ void parseUtil(FileProfile &fp, string &loadfile, int sample_rate){
     fstream fd;
     char buf[STR_BUFFER_SIZE];
     int ptr = 1; //skip the first of record which does not indicate a switch of freq.
-    double timestamp, utili = 0;
+    double timestamp;
     double swt_t, last_swt_t = 0;
     double load, accu;
     int count = 0;
@@ -250,7 +250,10 @@ int main(int argc, char **argv){
     cout << "target directory: " << targetdir << endl;
 
     vector<string> files;
-    getfiles(targetdir, files);
+    if(getfiles(targetdir, files)){
+		cout << "ERROR: get file list failed." << endl;
+		return(0);
+	}
 	printf("size of filelist: %d\n", files.size());
    
     //for every DFVS file, parse the switches and store to the vector.
@@ -260,9 +263,7 @@ int main(int argc, char **argv){
         targetf = &files[i];
         if(targetf->find("DVFS")==string::npos) continue;
 		
-		cout << "before call parseDVFS" << endl;
         FileProfile fprofile = parseDVFSSwitch(*targetf);
-		cout << "after call parseDVFS" << endl;
         
         printf("Number of switch: %d\n", fprofile.count);
         fps[*targetf] = fprofile;
