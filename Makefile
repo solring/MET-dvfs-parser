@@ -10,6 +10,9 @@ parseDFSswt.o: parseDFSswt.cpp Record.h
 Record.o: Record.cpp Record.h
 	$(CC) -c Record.cpp
 
+getStageData: getStageData.cpp
+	$(CC) -o getStageData getStageData.cpp
+	
 clean:
-	rm -rf *.o parseDFSswt
+	rm -rf *.o parseDFSswt getStageData
 	
